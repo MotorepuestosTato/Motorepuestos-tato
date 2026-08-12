@@ -183,26 +183,33 @@
         msalInstance.logoutPopup().then(() => location.reload());
     }
 
-    async function cargarHojaExcel(nombreHoja, tablaId) {
+async function cargarHojaExcel(nombreHoja, tablaId) {
         if (!accessToken) return;
         try {
-            // Buscamos los archivos de Excel en OneDrive del usuario
             const searchRes = await fetch(`https://graph.microsoft.com/v1.0/me/drive/root/search(q='.xlsx')`, {
                 headers: { Authorization: `Bearer ${accessToken}` }
             });
             const searchData = await searchRes.json();
             
             if (!searchData.value || searchData.value.length === 0) return;
-            const fileId = searchData.value[0].id; // Toma el primer archivo Excel encontrado
+            const fileId = searchData.value[0].id;
 
-            // Traemos los datos usados en la hoja especificada
-            const sheetRes = await fetch(`https://graph.microsoft.com/v1.0/me/drive/items/${fileId}/workbook/worksheets('${nombreHoja}')/usedRange`, {
+            // Codificamos el nombre para evitar el error 400 con espacios y tildes
+            const hojaEncoded = encodeURIComponent(nombreHoja);
+
+            const sheetRes = await fetch(`https://graph.microsoft.com/v1.0/me/drive/items/${fileId}/workbook/worksheets('${hojaEncoded}')/usedRange`, {
                 headers: { Authorization: `Bearer ${accessToken}` }
             });
+
+            if (!sheetRes.ok) {
+                console.error(`Error HTTP ${sheetRes.status} en la hoja ${nombreHoja}`);
+                return;
+            }
+
             const sheetData = await sheetRes.json();
 
             if (sheetData.values) {
-                const filas = sheetData.values.slice(1); // Omitir encabezados
+                const filas = sheetData.values.slice(1); // Omitir la fila de encabezados
                 const tbody = document.getElementById(tablaId);
                 tbody.innerHTML = "";
 
@@ -210,7 +217,7 @@
                     let tr = document.createElement("tr");
                     row.forEach(cell => {
                         let td = document.createElement("td");
-                        td.innerText = cell || "-";
+                        td.innerText = (cell !== null && cell !== undefined && cell !== "") ? cell : "-";
                         tr.appendChild(td);
                     });
                     tbody.appendChild(tr);
