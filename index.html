@@ -1,161 +1,43 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Motorepuestos TATO</title>
-
-<style>
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-    font-family: Arial, sans-serif;
-}
-
-body {
-    background: #f4f6f9;
-    color: #222;
-}
-
-header {
-    background: linear-gradient(135deg, #e9002b, #c90024);
-    color: white;
-    padding: 18px 25px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    box-shadow: 0 3px 10px rgba(0,0,0,.15);
-}
-
-.logo {
-    font-size: 25px;
-    font-weight: bold;
-}
-
-.logo span {
-    display: block;
-    font-size: 12px;
-    letter-spacing: 4px;
-    background: #1717a8;
-    padding: 4px 10px;
-    margin-top: 3px;
-    text-align: center;
-}
-
-.user {
-    font-size: 14px;
-}
-
-.container {
-    max-width: 1100px;
-    margin: 30px auto;
-    padding: 0 20px;
-}
-
-.welcome {
-    margin-bottom: 25px;
-}
-
-.welcome h1 {
-    font-size: 28px;
-    margin-bottom: 6px;
-}
-
-.welcome p {
-    color: #666;
-}
-
-.cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
-    gap: 20px;
-}
-
-.card {
-    background: white;
-    border-radius: 12px;
-    padding: 25px;
-    box-shadow: 0 3px 12px rgba(0,0,0,.08);
-    cursor: pointer;
-    transition: .2s;
-    border-left: 5px solid #e9002b;
-}
-
-.card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 6px 18px rgba(0,0,0,.12);
-}
-
-.icon {
-    font-size: 38px;
-    margin-bottom: 15px;
-}
-
-.card h2 {
-    font-size: 19px;
-    margin-bottom: 8px;
-}
-
-.card p {
-    color: #777;
-    font-size: 14px;
-    line-height: 1.5;
-}
-
-.section {
-    display: none;
-    background: white;
-    margin-top: 25px;
-    padding: 25px;
-    border-radius: 12px;
-    box-shadow: 0 3px 12px rgba(0,0,0,.08);
-}
-
-.section.active {
-    display: block;
-}
-
-.section h2 {
-    margin-bottom: 20px;
-}
-
-button {
-    background: #e9002b;
-    color: white;
-    border: none;
-    border-radius: 7px;
-    padding: 11px 18px;
-    cursor: pointer;
-    font-weight: bold;
-}
-
-button:hover {
-    background: #c90024;
-}
-
-.back {
-    background: #555;
-    margin-bottom: 20px;
-}
-
-.info {
-    background: #eef3ff;
-    border-radius: 8px;
-    padding: 15px;
-    margin-bottom: 15px;
-    line-height: 1.6;
-}
-
-footer {
-    text-align: center;
-    color: #888;
-    font-size: 12px;
-    margin: 40px 0 20px;
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Motorepuestos TATO</title>
+    <!-- Microsoft Authentication Library (MSAL) -->
+    <script src="https://alcdn.msauth.net/browser/2.35.0/js/msal-browser.min.js"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: Arial, sans-serif; }
+        body { background: #f4f6f9; color: #222; }
+        header { background: linear-gradient(135deg, #e9002b, #c90024); color: white; padding: 18px 25px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 3px 10px rgba(0,0,0,.15); }
+        .logo { font-size: 22px; font-weight: bold; }
+        .logo span { display: block; font-size: 11px; letter-spacing: 3px; background: #1717a8; padding: 3px 8px; margin-top: 3px; text-align: center; border-radius: 3px; }
+        .user-box { font-size: 14px; display: flex; align-items: center; gap: 10px; }
+        .btn-auth { background: #1717a8; color: white; border: none; padding: 8px 14px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        .btn-auth:hover { background: #0f0f78; }
+        .container { max-width: 1100px; margin: 30px auto; padding: 0 20px; }
+        .welcome { margin-bottom: 25px; }
+        .welcome h1 { font-size: 26px; margin-bottom: 6px; }
+        .welcome p { color: #666; }
+        .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 20px; }
+        .card { background: white; border-radius: 12px; padding: 25px; box-shadow: 0 3px 12px rgba(0,0,0,.08); cursor: pointer; transition: .2s; border-left: 5px solid #e9002b; }
+        .card:hover { transform: translateY(-3px); box-shadow: 0 6px 18px rgba(0,0,0,.12); }
+        .icon { font-size: 36px; margin-bottom: 12px; }
+        .card h2 { font-size: 18px; margin-bottom: 8px; }
+        .card p { color: #777; font-size: 13px; line-height: 1.4; }
+        .section { display: none; background: white; margin-top: 25px; padding: 25px; border-radius: 12px; box-shadow: 0 3px 12px rgba(0,0,0,.08); }
+        .section.active { display: block; }
+        button.back { background: #555; color: white; border: none; border-radius: 6px; padding: 8px 15px; cursor: pointer; font-weight: bold; margin-bottom: 20px; }
+        button.back:hover { background: #333; }
+        .table-container { overflow-x: auto; margin-top: 15px; }
+        table { width: 100%; border-collapse: collapse; text-align: left; font-size: 14px; }
+        th, td { padding: 12px 15px; border-bottom: 1px solid #ddd; }
+        th { background-color: #f8f9fa; color: #333; }
+        tr:hover { background-color: #f1f4f8; }
+        .badge { padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; background: #e0e0e0; }
+        footer { text-align: center; color: #888; font-size: 12px; margin: 40px 0 20px; }
+    </style>
 </head>
-
 <body>
 
 <header>
@@ -163,132 +45,153 @@ footer {
         Motorepuestos TATO
         <span>MOTOREPUESTOS</span>
     </div>
-
-    <div class="user">
-        👤 Usuario
+    <div class="user-box">
+        <span id="userName">👤 No conectado</span>
+        <button id="btnLogin" class="btn-auth" onclick="login()">Iniciar sesión</button>
     </div>
 </header>
 
 <div class="container">
 
-    <div class="welcome">
-        <h1>Panel de trabajo</h1>
-        <p>Sistema de reposición, compras e inventario</p>
+    <div class="welcome" id="welcomeHeader">
+        <h1>Panel de Trabajo</h1>
+        <p>Gestión de inventario, compras y reposición en tiempo real</p>
     </div>
 
-    <div class="cards">
-
+    <div class="cards" id="mainCards">
         <div class="card" onclick="mostrar('reposicion')">
             <div class="icon">📦</div>
-            <h2>Reposición sucursal</h2>
-            <p>Pedidos de productos para la sucursal San Martín.</p>
+            <h2>Reposición Sucursal</h2>
+            <p>Pedidos de repuestos solicitados para la sucursal San Martín.</p>
         </div>
 
         <div class="card" onclick="mostrar('compras')">
             <div class="icon">🛒</div>
-            <h2>Compras</h2>
-            <p>Productos pendientes de compra y seguimiento de pedidos.</p>
+            <h2>Pedido para Compras</h2>
+            <p>Productos pendientes de compra, proveedores y precios.</p>
         </div>
 
         <div class="card" onclick="mostrar('inventario')">
             <div class="icon">📊</div>
-            <h2>Inventario</h2>
-            <p>Consulta de stock y productos disponibles.</p>
+            <h2>Inventario General</h2>
+            <p>Consulta de stock disponible en la base de datos.</p>
         </div>
 
         <div class="card" onclick="mostrar('usuarios')">
             <div class="icon">👥</div>
             <h2>Usuarios</h2>
-            <p>Administración de trabajadores y permisos.</p>
+            <p>Administración de accesos e integrantes del equipo.</p>
         </div>
-
     </div>
 
+    <!-- SECCIÓN REPOSICIÓN SUCURSAL -->
     <div id="reposicion" class="section">
         <button class="back" onclick="volver()">← Volver</button>
-
-        <h2>📦 Reposición sucursal San Martín</h2>
-
-        <div class="info">
-            Aquí aparecerán los productos solicitados para enviar
-            desde la tienda principal hacia San Martín.
+        <h2>📦 Reposición Sucursal San Martín</h2>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Código</th>
+                        <th>Producto</th>
+                        <th>Marca</th>
+                        <th>Cantidad</th>
+                    </tr>
+                </thead>
+                <tbody id="tablaReposicion">
+                    <tr><td colspan="4" style="text-align:center; color:#888;">Inicia sesión para sincronizar con OneDrive.</td></tr>
+                </tbody>
+            </table>
         </div>
-
-        <p>
-            <strong>Campos:</strong>
-            Código · Producto · Marca · Cantidad
-        </p>
     </div>
 
+    <!-- SECCIÓN COMPRAS -->
     <div id="compras" class="section">
         <button class="back" onclick="volver()">← Volver</button>
-
-        <h2>🛒 Pedido para compras</h2>
-
-        <div class="info">
-            Aquí aparecerán los productos que deben comprarse,
-            junto con proveedor, precio y estado del pedido.
+        <h2>🛒 Pedido para Compras</h2>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Stock</th>
+                        <th>Cant. Comprar</th>
+                        <th>Cód. Prov.</th>
+                        <th>Descripción</th>
+                        <th>Proveedor</th>
+                        <th>Precio</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+                <tbody id="tablaCompras">
+                    <tr><td colspan="7" style="text-align:center; color:#888;">Inicia sesión para sincronizar con OneDrive.</td></tr>
+                </tbody>
+            </table>
         </div>
-
-        <p>
-            <strong>Campos:</strong>
-            Stock · Cantidad a comprar · Código proveedor ·
-            Descripción · Proveedor · Precio · Cantidad comprada ·
-            Fecha última compra · Estado
-        </p>
     </div>
 
+    <!-- SECCIÓN INVENTARIO -->
     <div id="inventario" class="section">
         <button class="back" onclick="volver()">← Volver</button>
-
-        <h2>📊 Inventario</h2>
-
-        <div class="info">
-            Próximamente conectaremos esta sección con tu información
-            de Excel en OneDrive.
-        </div>
+        <h2>📊 Inventario General</h2>
+        <p style="margin-top:15px; color:#666;">Próximamente conexión de catálogo completo.</p>
     </div>
 
+    <!-- SECCIÓN USUARIOS -->
     <div id="usuarios" class="section">
         <button class="back" onclick="volver()">← Volver</button>
-
-        <h2>👥 Usuarios</h2>
-
-        <div class="info">
-            Los usuarios tendrán diferentes permisos:
-            <br><br>
-            <strong>ADMIN:</strong> acceso completo<br>
-            <strong>COMPRAS:</strong> gestión de compras<br>
-            <strong>REPONEDORES:</strong> reposición de sucursal
-        </div>
+        <h2>👥 Control de Usuarios</h2>
+        <p style="margin-top:15px; color:#666;">Roles asignados: ADMIN, COMPRAS, REPONEDORES.</p>
     </div>
 
 </div>
 
 <footer>
-    Motorepuestos TATO · Sistema interno
+    Motorepuestos TATO · Sistema Interno
 </footer>
 
 <script>
-function mostrar(id) {
-    document.querySelector('.cards').style.display = 'none';
-    document.querySelector('.welcome').style.display = 'none';
+    // Configuración de MSAL / Azure Entra ID
+    const msalConfig = {
+        auth: {
+            clientId: "TU_CLIENT_ID_AQUI", // Reemplazar con el ID de aplicación de Azure Entra
+            authority: "https://login.microsoftonline.com/common",
+            redirectUri: "https://motorepuestostato.github.io/Motorepuestos-tato/"
+        }
+    };
 
-    document.querySelectorAll('.section').forEach(function(seccion) {
-        seccion.classList.remove('active');
-    });
+    const msalInstance = new msal.PublicClientApplication(msalConfig);
 
-    document.getElementById(id).classList.add('active');
-}
+    async function login() {
+        try {
+            const loginResponse = await msalInstance.loginPopup({
+                scopes: ["User.Read", "Files.ReadWrite"]
+            });
+            document.getElementById("userName").innerText = "👤 " + loginResponse.account.name;
+            document.getElementById("btnLogin").innerText = "Cerrar sesión";
+            document.getElementById("btnLogin").onclick = logout;
+        } catch (error) {
+            console.error("Error al iniciar sesión:", error);
+        }
+    }
 
-function volver() {
-    document.querySelectorAll('.section').forEach(function(seccion) {
-        seccion.classList.remove('active');
-    });
+    function logout() {
+        msalInstance.logoutPopup().then(() => {
+            location.reload();
+        });
+    }
 
-    document.querySelector('.cards').style.display = 'grid';
-    document.querySelector('.welcome').style.display = 'block';
-}
+    function mostrar(id) {
+        document.getElementById('mainCards').style.display = 'none';
+        document.getElementById('welcomeHeader').style.display = 'none';
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+    }
+
+    function volver() {
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        document.getElementById('mainCards').style.display = 'grid';
+        document.getElementById('welcomeHeader').style.display = 'block';
+    }
 </script>
 
 </body>
