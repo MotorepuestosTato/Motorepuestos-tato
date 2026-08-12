@@ -29,12 +29,13 @@
         .section.active { display: block; }
         button.back { background: #555; color: white; border: none; border-radius: 6px; padding: 8px 15px; cursor: pointer; font-weight: bold; margin-bottom: 20px; }
         button.back:hover { background: #333; }
+        .btn-sync { background: #28a745; color: white; border: none; border-radius: 6px; padding: 8px 15px; cursor: pointer; font-weight: bold; margin-left: 10px; }
+        .btn-sync:hover { background: #218838; }
         .table-container { overflow-x: auto; margin-top: 15px; }
         table { width: 100%; border-collapse: collapse; text-align: left; font-size: 14px; }
         th, td { padding: 12px 15px; border-bottom: 1px solid #ddd; }
         th { background-color: #f8f9fa; color: #333; }
         tr:hover { background-color: #f1f4f8; }
-        .badge { padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; background: #e0e0e0; }
         footer { text-align: center; color: #888; font-size: 12px; margin: 40px 0 20px; }
     </style>
 </head>
@@ -87,6 +88,7 @@
     <!-- SECCIÓN REPOSICIÓN SUCURSAL -->
     <div id="reposicion" class="section">
         <button class="back" onclick="volver()">← Volver</button>
+        <button class="btn-sync" onclick="cargarExcel()">🔄 Cargar datos Excel</button>
         <h2>📦 Reposición Sucursal San Martín</h2>
         <div class="table-container">
             <table>
@@ -99,7 +101,7 @@
                     </tr>
                 </thead>
                 <tbody id="tablaReposicion">
-                    <tr><td colspan="4" style="text-align:center; color:#888;">Inicia sesión para sincronizar con OneDrive.</td></tr>
+                    <tr><td colspan="4" style="text-align:center; color:#888;">Presiona "Cargar datos Excel" para sincronizar.</td></tr>
                 </tbody>
             </table>
         </div>
@@ -108,6 +110,7 @@
     <!-- SECCIÓN COMPRAS -->
     <div id="compras" class="section">
         <button class="back" onclick="volver()">← Volver</button>
+        <button class="btn-sync" onclick="cargarExcel()">🔄 Cargar datos Excel</button>
         <h2>🛒 Pedido para Compras</h2>
         <div class="table-container">
             <table>
@@ -123,7 +126,7 @@
                     </tr>
                 </thead>
                 <tbody id="tablaCompras">
-                    <tr><td colspan="7" style="text-align:center; color:#888;">Inicia sesión para sincronizar con OneDrive.</td></tr>
+                    <tr><td colspan="7" style="text-align:center; color:#888;">Presiona "Cargar datos Excel" para sincronizar.</td></tr>
                 </tbody>
             </table>
         </div>
@@ -133,7 +136,7 @@
     <div id="inventario" class="section">
         <button class="back" onclick="volver()">← Volver</button>
         <h2>📊 Inventario General</h2>
-        <p style="margin-top:15px; color:#666;">Próximamente conexión de catálogo completo.</p>
+        <p style="margin-top:15px; color:#666;">Conectado a OneDrive con Microsoft Graph.</p>
     </div>
 
     <!-- SECCIÓN USUARIOS -->
@@ -150,16 +153,16 @@
 </footer>
 
 <script>
-    // Configuración de MSAL / Azure Entra ID
     const msalConfig = {
         auth: {
-            clientId: "a11c4de7-7138-4674-8559-f19837f81aa0", // Reemplazar con el ID de aplicación de Azure Entra
+            clientId: "a11c4de7-7138-4674-8559-f19837f81aa0",
             authority: "https://login.microsoftonline.com/common",
             redirectUri: "https://motorepuestostato.github.io/Motorepuestos-tato/"
         }
     };
 
     const msalInstance = new msal.PublicClientApplication(msalConfig);
+    let accessToken = "";
 
     async function login() {
         try {
@@ -169,15 +172,58 @@
             document.getElementById("userName").innerText = "👤 " + loginResponse.account.name;
             document.getElementById("btnLogin").innerText = "Cerrar sesión";
             document.getElementById("btnLogin").onclick = logout;
+            accessToken = loginResponse.accessToken;
+            cargarExcel();
         } catch (error) {
             console.error("Error al iniciar sesión:", error);
         }
     }
 
     function logout() {
-        msalInstance.logoutPopup().then(() => {
-            location.reload();
-        });
+        msalInstance.logoutPopup().then(() => location.reload());
+    }
+
+    async function cargarHojaExcel(nombreHoja, tablaId) {
+        if (!accessToken) return;
+        try {
+            // Buscamos los archivos de Excel en OneDrive del usuario
+            const searchRes = await fetch(`https://graph.microsoft.com/v1.0/me/drive/root/search(q='.xlsx')`, {
+                headers: { Authorization: `Bearer ${accessToken}` }
+            });
+            const searchData = await searchRes.json();
+            
+            if (!searchData.value || searchData.value.length === 0) return;
+            const fileId = searchData.value[0].id; // Toma el primer archivo Excel encontrado
+
+            // Traemos los datos usados en la hoja especificada
+            const sheetRes = await fetch(`https://graph.microsoft.com/v1.0/me/drive/items/${fileId}/workbook/worksheets('${nombreHoja}')/usedRange`, {
+                headers: { Authorization: `Bearer ${accessToken}` }
+            });
+            const sheetData = await sheetRes.json();
+
+            if (sheetData.values) {
+                const filas = sheetData.values.slice(1); // Omitir encabezados
+                const tbody = document.getElementById(tablaId);
+                tbody.innerHTML = "";
+
+                filas.forEach(row => {
+                    let tr = document.createElement("tr");
+                    row.forEach(cell => {
+                        let td = document.createElement("td");
+                        td.innerText = cell || "-";
+                        tr.appendChild(td);
+                    });
+                    tbody.appendChild(tr);
+                });
+            }
+        } catch (err) {
+            console.error("Error cargando la hoja " + nombreHoja, err);
+        }
+    }
+
+    function cargarExcel() {
+        cargarHojaExcel("reposición sucursal", "tablaReposicion");
+        cargarHojaExcel("pedido para compras", "tablaCompras");
     }
 
     function mostrar(id) {
