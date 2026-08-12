@@ -186,6 +186,7 @@
 async function cargarHojaExcel(nombreHoja, tablaId) {
         if (!accessToken) return;
         try {
+            // 1. Buscar el archivo Excel en OneDrive
             const searchRes = await fetch(`https://graph.microsoft.com/v1.0/me/drive/root/search(q='.xlsx')`, {
                 headers: { Authorization: `Bearer ${accessToken}` }
             });
@@ -194,15 +195,31 @@ async function cargarHojaExcel(nombreHoja, tablaId) {
             if (!searchData.value || searchData.value.length === 0) return;
             const fileId = searchData.value[0].id;
 
-            // Codificamos el nombre para evitar el error 400 con espacios y tildes
-            const hojaEncoded = encodeURIComponent(nombreHoja);
+            // 2. Obtener todas las hojas del libro de Excel para evitar errores de nombre/mayúsculas
+            const sheetsRes = await fetch(`https://graph.microsoft.com/v1.0/me/drive/items/${fileId}/workbook/worksheets`, {
+                headers: { Authorization: `Bearer ${accessToken}` }
+            });
+            const sheetsData = await sheetsRes.json();
 
-            const sheetRes = await fetch(`https://graph.microsoft.com/v1.0/me/drive/items/${fileId}/workbook/worksheets('${hojaEncoded}')/usedRange`, {
+            if (!sheetsData.value) return;
+
+            // Buscar la hoja ignorando diferencias de mayúsculas, minúsculas o espacios extra
+            const hojaEncontrada = sheetsData.value.find(s => 
+                s.name.trim().toLowerCase() === nombreHoja.trim().toLowerCase()
+            );
+
+            if (!hojaEncontrada) {
+                console.warn(`No se encontró la hoja: "${nombreHoja}". Hojas disponibles en el Excel:`, sheetsData.value.map(s => s.name));
+                return;
+            }
+
+            // 3. Obtener los datos usando el ID exacto de la hoja
+            const sheetRes = await fetch(`https://graph.microsoft.com/v1.0/me/drive/items/${fileId}/workbook/worksheets('${hojaEncontrada.id}')/usedRange`, {
                 headers: { Authorization: `Bearer ${accessToken}` }
             });
 
             if (!sheetRes.ok) {
-                console.error(`Error HTTP ${sheetRes.status} en la hoja ${nombreHoja}`);
+                console.error(`Error HTTP ${sheetRes.status} al leer los datos de ${hojaEncontrada.name}`);
                 return;
             }
 
